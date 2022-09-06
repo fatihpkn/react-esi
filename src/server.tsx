@@ -64,7 +64,7 @@ export const createIncludeElement = (
   url.searchParams.append("props", JSON.stringify(props));
   url.searchParams.append("sign", '__WEG__');
 
-  esiAt.src = url.pathname + url.search;
+  esiAt.src = 'https://www.enuygun.com' + url.pathname + url.search;
   let attrs = "";
   Object.entries(esiAt).forEach(
     ([key, value]) => (attrs += ` ${key}="${value ? escapeAttr(value) : ""}"`)
