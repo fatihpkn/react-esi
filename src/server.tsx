@@ -4,7 +4,7 @@ import React from "react";
 import { renderToNodeStream } from "react-dom/server";
 import { Readable, Transform } from "stream";
 
-export const path = process.env.REACT_ESI_PATH || "/_fragment";
+export const path = process.env.REACT_ESI_PATH || "/arac-kiralama/_fragment";
 const secret =
   process.env.REACT_ESI_SECRET || crypto.randomBytes(64).toString("hex");
 
@@ -108,6 +108,7 @@ class RemoveReactRoot extends Transform {
 
 interface IServeFragmentOptions {
   pipeStream?: (stream: NodeJS.ReadableStream) => NodeJS.ReadableStream;
+  public_base?: string;
 }
 
 type resolver = (
