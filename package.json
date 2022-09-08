@@ -17,6 +17,7 @@
     "@types/react": "^16.8.2",
     "@types/react-dom": "^16.8.0",
     "@types/react-test-renderer": "^16.8.0",
+    "@types/styled-components": "^5.1.26",
     "@types/supertest": "^2.0.7",
     "coveralls": "^3.0.2",
     "express": "^4.16.4",
@@ -26,6 +27,7 @@
     "react": "^16.7.0",
     "react-dom": "^16.7.0",
     "react-test-renderer": "^16.8.1",
+    "styled-components": "^5.3.3",
     "supertest": "^3.4.2",
     "ts-jest": "^23.10.5",
     "tslint": "^5.12.1",
@@ -42,5 +44,5 @@
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "dependencies": {},
-  "version": "0.3.5"
+  "version": "0.3.7"
 }

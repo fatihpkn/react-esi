@@ -3,10 +3,10 @@ import { Request, Response } from "express";
 import React from "react";
 import { renderToNodeStream } from "react-dom/server";
 import { Readable, Transform } from "stream";
+import { ServerStyleSheet, StyleSheetManager } from "styled-components";
 
-export const path = process.env.REACT_ESI_PATH || "/arac-kiralama/_fragment";
-const secret =
-  process.env.REACT_ESI_SECRET || crypto.randomBytes(64).toString("hex");
+export const path = process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/_eufragment";
+const secret = crypto.randomBytes(64).toString("hex");
 
 /**
  * Signs the ESI URL with a secret key using the HMAC-SHA256 algorithm.
@@ -23,7 +23,7 @@ function sign(url: URL) {
  * Adapted from https://stackoverflow.com/a/27979933/1352334 (hgoebl)
  */
 function escapeAttr(attr: string): string {
-  return attr.replace(/[<>&'"]/g, c => {
+  return attr.replace(/[<>&'"]/g, (c) => {
     switch (c) {
       case "<":
         return "&lt;";
@@ -52,23 +52,17 @@ interface IEsiProps {
 /**
  * Creates the <esi:include> tag.
  */
-export const createIncludeElement = (
-  fragmentID: string,
-  props: object,
-  esi: IEsiProps
-) => {
+export const createIncludeElement = (fragmentID: string, props: object, esi: IEsiProps) => {
   const esiAt = esi.attrs || {};
 
   const url = new URL(path, "http://example.com");
   url.searchParams.append("fragment", fragmentID);
   url.searchParams.append("props", JSON.stringify(props));
-  url.searchParams.append("sign", '__WEG__');
+  url.searchParams.append("sign", sign(url));
 
   esiAt.src = url.pathname + url.search;
   let attrs = "";
-  Object.entries(esiAt).forEach(
-    ([key, value]) => (attrs += ` ${key}="${value ? escapeAttr(value) : ""}"`)
-  );
+  Object.entries(esiAt).forEach(([key, value]) => (attrs += ` ${key}="${value ? escapeAttr(value) : ""}"`));
 
   return `<esi:include${attrs} />`;
 };
@@ -111,27 +105,17 @@ interface IServeFragmentOptions {
   public_base?: string;
 }
 
-type resolver = (
-  fragmentID: string,
-  props: object,
-  req: Request,
-  res: Response
-) => React.ComponentType<any>;
+type resolver = (fragmentID: string, props: object, req: Request, res: Response) => React.ComponentType<any>;
 
 /**
  * Checks the signature, renders the given fragment as HTML and injects the initial props in a <script> tag.
  */
-export async function serveFragment(
-  req: Request,
-  res: Response,
-  resolve: resolver,
-  options: IServeFragmentOptions = {}
-) {
+export async function serveFragment(req: Request, res: Response, resolve: resolver, options: IServeFragmentOptions = {}) {
   const url = new URL(req.url, "http://example.com");
-  const expectedSign = '__WEG__' || url.searchParams.get("sign");
+  const expectedSign = url.searchParams.get("sign");
 
   url.searchParams.delete("sign");
-  if ('__WEG__' !== expectedSign) {
+  if (sign(url) !== expectedSign) {
     res.status(400);
     res.send("Bad signature");
     return;
@@ -149,7 +133,7 @@ export async function serveFragment(
     ? await (Component as any).getInitialProps({
         props: baseChildProps,
         req,
-        res
+        res,
       })
     : baseChildProps;
 
@@ -158,20 +142,28 @@ export async function serveFragment(
 
   // Remove the <script> class from the DOM to prevent breaking the React reconciliation algorithm
   const script = "<script>window.__REACT_ESI__ = window.__REACT_ESI__ || {}; window.__REACT_ESI__['" + fragmentID + "'] = " + encodedProps + ";document.currentScript.remove();</script>";
-  const scriptStream = Readable.from(script)
+  const scriptStream = Readable.from(script);
   scriptStream.pipe(res, { end: false });
-
+  const sheet = new ServerStyleSheet();
   // Wrap the content in a div having the data-reactroot attribute, to be removed
-  const stream = renderToNodeStream(
-    <div>
-      <Component {...childProps} />
-    </div>
+  let stream;
+  try {
+  stream = renderToNodeStream(
+    <StyleSheetManager sheet={sheet.instance}>
+      <div>
+        <Component {...childProps} />
+      </div>
+    </StyleSheetManager>
   );
+  } finally {
+    sheet.seal();
+  }
 
   const removeReactRootStream = new RemoveReactRoot();
   stream.pipe(removeReactRootStream);
 
-  const lastStream: NodeJS.ReadableStream =  options.pipeStream ? options.pipeStream(removeReactRootStream) : removeReactRootStream;
-  
+  const lastStream: NodeJS.ReadableStream = options.pipeStream ? options.pipeStream(removeReactRootStream) : removeReactRootStream;
+
   lastStream.pipe(res);
+
 }
