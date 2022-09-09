@@ -3,9 +3,8 @@ import { Request, Response } from "express";
 import React from "react";
 import { renderToNodeStream } from "react-dom/server";
 import { Readable, Transform } from "stream";
-import { ServerStyleSheet, StyleSheetManager } from "styled-components";
 
-export const path = process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/_eufragment";
+export const path = process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
 const secret = crypto.randomBytes(64).toString("hex");
 
 /**
@@ -144,20 +143,11 @@ export async function serveFragment(req: Request, res: Response, resolve: resolv
   const script = "<script>window.__REACT_ESI__ = window.__REACT_ESI__ || {}; window.__REACT_ESI__['" + fragmentID + "'] = " + encodedProps + ";document.currentScript.remove();</script>";
   const scriptStream = Readable.from(script);
   scriptStream.pipe(res, { end: false });
-  const sheet = new ServerStyleSheet();
-  // Wrap the content in a div having the data-reactroot attribute, to be removed
-  let stream;
-  try {
-  stream = renderToNodeStream(
-    <StyleSheetManager sheet={sheet.instance}>
-      <div>
-        <Component {...childProps} />
-      </div>
-    </StyleSheetManager>
+  const stream = renderToNodeStream(
+    <div>
+      <Component {...childProps} />
+    </div>
   );
-  } finally {
-    sheet.seal();
-  }
 
   const removeReactRootStream = new RemoveReactRoot();
   stream.pipe(removeReactRootStream);
@@ -165,5 +155,4 @@ export async function serveFragment(req: Request, res: Response, resolve: resolv
   const lastStream: NodeJS.ReadableStream = options.pipeStream ? options.pipeStream(removeReactRootStream) : removeReactRootStream;
 
   lastStream.pipe(res);
-
 }
