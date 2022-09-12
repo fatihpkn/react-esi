@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import React from "react";
 import { renderToNodeStream } from "react-dom/server";
 import { Readable, Transform } from "stream";
+import { ServerStyleSheet } from 'styled-components';
 
 export const path = process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
 const secret = crypto.randomBytes(64).toString("hex");
@@ -143,11 +144,9 @@ export async function serveFragment(req: Request, res: Response, resolve: resolv
   const script = "<script>window.__REACT_ESI__ = window.__REACT_ESI__ || {}; window.__REACT_ESI__['" + fragmentID + "'] = " + encodedProps + ";document.currentScript.remove();</script>";
   const scriptStream = Readable.from(script);
   scriptStream.pipe(res, { end: false });
-  const stream = renderToNodeStream(
-    <div>
-      <Component {...childProps} />
-    </div>
-  );
+  const sheet = new ServerStyleSheet();
+  const jsx = sheet.collectStyles(<Component {...childProps} />);
+  const stream = sheet.interleaveWithNodeStream(renderToNodeStream(<div>{jsx}</div>));
 
   const removeReactRootStream = new RemoveReactRoot();
   stream.pipe(removeReactRootStream);
