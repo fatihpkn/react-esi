@@ -11,11 +11,11 @@ const secret = crypto.randomBytes(64).toString("hex");
 /**
  * Signs the ESI URL with a secret key using the HMAC-SHA256 algorithm.
  */
-function sign(url: URL) {
+/*function sign(url: URL) {
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(url.pathname + url.search);
   return hmac.digest("hex");
-}
+}*/
 
 /**
  * Escapes ESI attributes.
@@ -58,7 +58,7 @@ export const createIncludeElement = (fragmentID: string, props: object, esi: IEs
   const url = new URL(path, "http://example.com");
   url.searchParams.append("fragment", fragmentID);
   url.searchParams.append("props", JSON.stringify(props));
-  url.searchParams.append("sign", sign(url));
+ // url.searchParams.append("sign", sign(url));
 
   esiAt.src = url.pathname + url.search;
   let attrs = "";
@@ -112,14 +112,14 @@ type resolver = (fragmentID: string, props: object, req: Request, res: Response)
  */
 export async function serveFragment(req: Request, res: Response, resolve: resolver, options: IServeFragmentOptions = {}) {
   const url = new URL(req.url, "http://example.com");
-  const expectedSign = url.searchParams.get("sign");
+  /*onst expectedSign = url.searchParams.get("sign");
 
   url.searchParams.delete("sign");
   if (sign(url) !== expectedSign) {
     res.status(400);
     res.send("Bad signature");
     return;
-  }
+  }*/
 
   const rawProps = url.searchParams.get("props");
   const props = rawProps ? JSON.parse(rawProps) : {};
