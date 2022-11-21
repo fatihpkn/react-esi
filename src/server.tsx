@@ -11,11 +11,11 @@ const secret = crypto.randomBytes(64).toString("hex");
 /**
  * Signs the ESI URL with a secret key using the HMAC-SHA256 algorithm.
  */
-function sign(url: URL) {
+/*function sign(url: URL) {
   const hmac = crypto.createHmac("sha256", secret);
   hmac.update(url.pathname + url.search);
   return hmac.digest("hex");
-}
+}*/
 
 /**
  * Escapes ESI attributes.
@@ -135,8 +135,7 @@ export async function serveFragment(req: Request, res: Response, resolve: resolv
   const script = "<script>window.__REACT_ESI__ = window.__REACT_ESI__ || {}; window.__REACT_ESI__['" + fragmentID + "'] = " + encodedProps + ";document.currentScript.remove();</script>";
   const scriptStream = Readable.from(script);
   scriptStream.pipe(res, { end: false });
-  const jsx = <Component {...childProps} />;
-  const stream = renderToNodeStream(<div>{jsx}</div>);
+  const stream = renderToNodeStream(<div><Component {...childProps} /></div>);
 
   const removeReactRootStream = new RemoveReactRoot();
   stream.pipe(removeReactRootStream);
