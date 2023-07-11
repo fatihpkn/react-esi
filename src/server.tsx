@@ -1,9 +1,12 @@
-import { Request, Response } from "express";
-import React from "react";
-import { renderToNodeStream } from "react-dom/server";
+import { PipeableStream, renderToNodeStream, renderToPipeableStream, version } from "react-dom/server";
 import { Readable, Transform } from "stream";
+import { Request, Response } from "express";
+
+import React from "react";
 
 export const path = process.env.REACT_ESI_PATH || process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
+
+const streamMethod = !React.version.startsWith('18.') && !version.startsWith('18.') ? renderToNodeStream : renderToPipeableStream;
 
 /**
  * Escapes ESI attributes.
@@ -124,9 +127,10 @@ export async function serveFragment(req: Request, res: Response, resolve: resolv
   const scriptStream = Readable.from(script);
   scriptStream.pipe(res, { end: false });
   const jsx = <Component {...childProps} />;
-  const stream = renderToNodeStream(<div>{jsx}</div>);
+  const stream = streamMethod(<div>{jsx}</div>);
 
   const removeReactRootStream = new RemoveReactRoot();
+  //@ts-ignore
   stream.pipe(removeReactRootStream);
 
   const lastStream: NodeJS.ReadableStream = options.pipeStream ? options.pipeStream(removeReactRootStream) : removeReactRootStream;
