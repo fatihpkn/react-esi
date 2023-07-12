@@ -6,6 +6,7 @@ import React from "react";
 
 export const path = process.env.REACT_ESI_PATH || process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
 
+const isReact18 = React.version.startsWith('18.') && version.startsWith('18.');
 const streamMethod = !React.version.startsWith('18.') && !version.startsWith('18.') ? renderToNodeStream : renderToPipeableStream;
 
 /**
@@ -69,6 +70,12 @@ class RemoveReactRoot extends Transform {
   public _transform(chunk: any, encoding: string, callback: transformCallback) {
     // '<div data-reactroot="">'.length is 23
     chunk = chunk.toString();
+
+    if(isReact18) {
+      callback(undefined, chunk);
+      return;
+    }
+
     if (this.skipStartOfDiv) {
       // Skip the wrapper start tag
       chunk = chunk.substring(23);
