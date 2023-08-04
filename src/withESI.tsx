@@ -1,5 +1,6 @@
-import PropTypes from "prop-types";
 import React, { WeakValidationMap } from "react";
+
+import PropTypes from "prop-types";
 
 declare global {
   // tslint:disable-next-line
@@ -25,7 +26,8 @@ interface IWithESIProps {
  */
 export default function withESI<P>(
   WrappedComponent: React.ComponentType<P>,
-  fragmentID: string
+  fragmentID: string,
+  overridePath?: string
 ): React.ComponentClass<IWithESIProps & P> {
   return class WithESI extends React.Component<P & IWithESIProps> {
     public static WrappedComponent = WrappedComponent;
@@ -101,7 +103,8 @@ export default function withESI<P>(
             __html: server.createIncludeElement(
               fragmentID,
               this.props,
-              this.esi
+              this.esi,
+              overridePath
             )
           }}
         />

@@ -4,10 +4,10 @@ import { Request, Response } from "express";
 
 import React from "react";
 
-export const path = process.env.REACT_ESI_PATH || process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
+export let path = process.env.REACT_ESI_PATH || process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
 
-const isReact18 = React.version.startsWith('18.') && version.startsWith('18.');
-const streamMethod = !React.version.startsWith('18.') && !version.startsWith('18.') ? renderToNodeStream : renderToPipeableStream;
+const isReact18 = React.version.startsWith("18.") && version.startsWith("18.");
+const streamMethod = !React.version.startsWith("18.") && !version.startsWith("18.") ? renderToNodeStream : renderToPipeableStream;
 
 /**
  * Escapes ESI attributes.
@@ -44,13 +44,16 @@ interface IEsiProps {
 /**
  * Creates the <esi:include> tag.
  */
-export const createIncludeElement = (fragmentID: string, props: object, esi: IEsiProps) => {
+export const createIncludeElement = (fragmentID: string, props: object, esi: IEsiProps, overridePath: string) => {
   const esiAt = esi.attrs || {};
 
-  const url = new URL(path, "http://example.com");
+  const $path = overridePath || path;
+
+  const url = new URL($path, "http://example.com");
   url.searchParams.append("fragment", fragmentID);
   url.searchParams.append("props", JSON.stringify(props));
 
+  console.log("Env ->", process.env);
   esiAt.src = url.pathname + url.search;
   let attrs = "";
   Object.entries(esiAt).forEach(([key, value]) => (attrs += ` ${key}="${value ? escapeAttr(value) : ""}"`));
@@ -71,7 +74,7 @@ class RemoveReactRoot extends Transform {
     // '<div data-reactroot="">'.length is 23
     chunk = chunk.toString();
 
-    if(isReact18) {
+    if (isReact18) {
       callback(undefined, chunk);
       return;
     }
