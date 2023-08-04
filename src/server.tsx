@@ -44,7 +44,7 @@ interface IEsiProps {
 /**
  * Creates the <esi:include> tag.
  */
-export const createIncludeElement = (fragmentID: string, props: object, esi: IEsiProps, overridePath: string) => {
+export const createIncludeElement = (fragmentID: string, props: object, esi: IEsiProps, overridePath?: string) => {
   const esiAt = esi.attrs || {};
 
   const $path = overridePath || path;
