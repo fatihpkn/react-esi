@@ -4,7 +4,7 @@ import { Request, Response } from "express";
 
 import React from "react";
 
-export let path = process.env.REACT_ESI_PATH || process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/arac-kiralama/_eufragment";
+export let path = process.env.REACT_ESI_PATH || process.env.NEXT_PUBLIC_REACT_ESI_PATH || "/_fragment";
 
 const isReact18 = React.version.startsWith("18.") && version.startsWith("18.");
 const streamMethod = !React.version.startsWith("18.") && !version.startsWith("18.") ? renderToNodeStream : renderToPipeableStream;
