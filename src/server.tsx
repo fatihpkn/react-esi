@@ -74,10 +74,10 @@ class RemoveReactRoot extends Transform {
     // '<div data-reactroot="">'.length is 23
     chunk = chunk.toString();
 
-    if (isReact18) {
-      callback(undefined, chunk);
-      return;
-    }
+    // if (isReact18) {
+    //   callback(undefined, chunk);
+    //   return;
+    // }
 
     if (this.skipStartOfDiv) {
       // Skip the wrapper start tag
@@ -137,7 +137,10 @@ export async function serveFragment(req: Request, res: Response, resolve: resolv
   const scriptStream = Readable.from(script);
   scriptStream.pipe(res, { end: false });
   const jsx = <Component {...childProps} />;
-  const stream = streamMethod(<div>{jsx}</div>);
+
+  const JsxEl = isReact18 ? <div data-reactroot=''>{jsx}</div> : <div>{jsx}</div>;
+
+  const stream = streamMethod(JsxEl);
 
   const removeReactRootStream = new RemoveReactRoot();
   //@ts-ignore
