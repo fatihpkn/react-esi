@@ -53,7 +53,6 @@ export const createIncludeElement = (fragmentID: string, props: object, esi: IEs
   url.searchParams.append("fragment", fragmentID);
   url.searchParams.append("props", JSON.stringify(props));
 
-  console.log("Env ->", process.env);
   esiAt.src = url.pathname + url.search;
   let attrs = "";
   Object.entries(esiAt).forEach(([key, value]) => (attrs += ` ${key}="${value ? escapeAttr(value) : ""}"`));
